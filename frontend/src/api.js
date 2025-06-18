@@ -1,7 +1,15 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_ENV === 'production'
+  ? import.meta.env.VITE_APP_API_URL_PRO
+  : import.meta.env.VITE_APP_API_URL_DEV;
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${BASE_URL}/api`,
+  timeout: 30000, // Increased timeout to 30 seconds
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 API.interceptors.request.use((req) => {

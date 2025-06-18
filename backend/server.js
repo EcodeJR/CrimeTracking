@@ -8,7 +8,14 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? true  // Same origin in production
+    : ['', 'http://localhost:5173'], // Dev origins
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 const { protect } = require("./middleware/authMiddleware");
