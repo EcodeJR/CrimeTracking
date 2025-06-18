@@ -11,7 +11,7 @@ const app = express();
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? true  // Same origin in production
-    : ['', 'http://localhost:5173'], // Dev origins
+    : ['https://crime-tracking.vercel.app', 'http://localhost:5173'], // Dev origins
   credentials: true
 };
 
