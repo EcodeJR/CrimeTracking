@@ -24,7 +24,6 @@ const loginLimiter = rateLimit({
 
 // Register route with validation
 router.post("/register", validateRequest(registerSchema), async (req, res) => {
-  console.log('Registration attempt:', req.body);
   const { username, password, role, adminCode } = req.body;
 
   try {
@@ -60,7 +59,7 @@ router.post("/register", validateRequest(registerSchema), async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (err) {
-    console.log('Registration error details:', err); // Enhanced logging
+    // console.log('Registration error details:', err); // Enhanced logging
     res.status(500).json({ 
       message: "Failed to register user. Please try again.",
       // error: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -88,7 +87,7 @@ router.post("/login", loginLimiter, validateRequest(loginSchema), async (req, re
       });
     }
   } catch (err) {
-    console.error('Login error:', err);
+    // console.error('Login error:', err);
     res.status(500).json({ 
       message: "Login failed. Please try again." 
     });
