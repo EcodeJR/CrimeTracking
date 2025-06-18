@@ -36,10 +36,12 @@ const CriminalTable = () => {
     setOpenModal(true);
   };
 
-  const handlePrint = useReactToPrint({
-    content: () => tableRef.current,
-    documentTitle: "Criminal_Report",
-  });
+const handlePrint = useReactToPrint({
+  contentRef: tableRef,         // ✅ Use contentRef instead of content()
+  documentTitle: "Criminal_Report",
+});
+
+
 
   // Memoize filtered data with search
   const filteredData = useMemo(() => {

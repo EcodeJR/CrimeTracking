@@ -36,7 +36,7 @@ const SuspectTable = () => {
   };
 
   const handlePrint = useReactToPrint({
-    content: () => tableRef.current,
+    contentRef: tableRef,
     documentTitle: "Suspects_Report",
   });
 

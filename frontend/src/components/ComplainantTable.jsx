@@ -36,7 +36,7 @@ const ComplainantTable = () => {
   };
 
   const handlePrint = useReactToPrint({
-    content: () => tableRef.current,
+    contentRef: tableRef,
     documentTitle: "Complainants_Report",
   });
 
