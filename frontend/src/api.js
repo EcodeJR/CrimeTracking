@@ -6,7 +6,7 @@ const BASE_URL = import.meta.env.VITE_ENV === 'production'
 
 const API = axios.create({
   baseURL: `${BASE_URL}/api`,
-  timeout: 30000, // Increased timeout to 30 seconds
+  timeout: 200000, // Increased timeout to 30 seconds
   headers: {
     'Content-Type': 'application/json',
   }
