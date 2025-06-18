@@ -37,7 +37,7 @@ const CriminalTable = () => {
   };
 
 const handlePrint = useReactToPrint({
-  contentRef: tableRef,         // ✅ Use contentRef instead of content()
+  contentRef: tableRef,
   documentTitle: "Criminal_Report",
 });
 
