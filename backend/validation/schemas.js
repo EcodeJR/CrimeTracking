@@ -24,8 +24,10 @@ const criminalSchema = Joi.object({
   height: Joi.number().min(0),
   weight: Joi.number().min(0),
   remarks: Joi.string(),
-  officerInCharge: Joi.string().required()
-});
+  officerInCharge: Joi.string().required(),
+  photo: Joi.any(),
+  thumbprint: Joi.any()
+}).unknown(true);
 
 const suspectSchema = Joi.object({
   name: Joi.string().required().trim(),
@@ -40,8 +42,10 @@ const suspectSchema = Joi.object({
   height: Joi.number().min(0),
   weight: Joi.number().min(0),
   remarks: Joi.string(),
-  officerInCharge: Joi.string().required()
-});
+  officerInCharge: Joi.string().required(),
+  photo: Joi.any(),
+  thumbprint: Joi.any()
+}).unknown(true);
 
 const complainantSchema = Joi.object({
   name: Joi.string().required().trim(),
@@ -57,8 +61,10 @@ const complainantSchema = Joi.object({
   reportDate: Joi.date().required(),
   reportTime: Joi.string().required(),
   remarks: Joi.string(),
-  officerInCharge: Joi.string().required()
-});
+  officerInCharge: Joi.string().required(),
+  photo: Joi.any(),
+  thumbprint: Joi.any()
+}).unknown(true);
 
 module.exports = {
   criminalSchema,
