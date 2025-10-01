@@ -25,10 +25,10 @@ router.post(
 
       const criminal = new Criminal({
         ...body,
-        photo: files.photo
+        photo: files && files.photo
           ? { data: files.photo[0].buffer, contentType: files.photo[0].mimetype }
           : undefined,
-        thumbprint: files.thumbprint
+        thumbprint: files && files.thumbprint
           ? { data: files.thumbprint[0].buffer, contentType: files.thumbprint[0].mimetype }
           : undefined,
         createdBy: user.username,
