@@ -18,8 +18,6 @@ const CriminalForm = ({ onClose }) => {
     remarks: "",
     officerInCharge: "",
   });
-  const [photo, setPhoto] = useState(null);
-  const [thumbprint, setThumbprint] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [thumbPreview, setThumbPreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,25 +30,23 @@ const CriminalForm = ({ onClose }) => {
     const file = e.target.files[0];
     const url = URL.createObjectURL(file);
     if (type === "photo") {
-      setPhoto(file);
       setPhotoPreview(url);
     } else {
-      setThumbprint(file);
       setThumbPreview(url);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
     setLoading(true);
     setError(null);
     try {
-      const data = new FormData();
-      Object.keys(form).forEach((key) => data.append(key, form[key]));
-      if (photo) data.append("photo", photo);
-      if (thumbprint) data.append("thumbprint", thumbprint);
-
-      await API.post("/criminals", data);
+      await fetch('/api/criminals', {
+        method: 'POST',
+        body: formData,
+        // No need for Content-Type header; browser sets it automatically for FormData
+      });
       alert("Criminal added successfully");
       onClose();
       // Reset form
@@ -70,8 +66,6 @@ const CriminalForm = ({ onClose }) => {
         remarks: "",
         officerInCharge: "",
       });
-      setPhoto(null);
-      setThumbprint(null);
       setPhotoPreview("");
       setThumbPreview("");
     } catch (err) {
@@ -165,7 +159,7 @@ const CriminalForm = ({ onClose }) => {
 
         {/* Form Content */}
         <div className="overflow-y-auto max-h-[calc(95vh-220px)]">
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Form Fields - Left 3 columns */}
               <div className="lg:col-span-3 space-y-8">
@@ -255,6 +249,7 @@ const CriminalForm = ({ onClose }) => {
                         accept="image/*"
                         className="hidden"
                         id="photo-upload"
+                        name="photo"
                       />
                       <label htmlFor="photo-upload" className="cursor-pointer">
                         {photoPreview ? (
@@ -296,6 +291,7 @@ const CriminalForm = ({ onClose }) => {
                         accept="image/*"
                         className="hidden"
                         id="thumbprint-upload"
+                        name="thumbprint"
                       />
                       <label htmlFor="thumbprint-upload" className="cursor-pointer">
                         {thumbPreview ? (

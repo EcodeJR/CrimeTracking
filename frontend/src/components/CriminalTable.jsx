@@ -41,6 +41,8 @@ const handlePrint = useReactToPrint({
   documentTitle: "Criminal_Report",
 });
 
+const getPhotoUrl = (id) => `/api/criminals/photo/${id}`;
+
 
 
   // Memoize filtered data with search
@@ -138,7 +140,7 @@ const handlePrint = useReactToPrint({
               <tr key={criminal._id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <ImageWithAuth
-                    src={`/criminals/photo/${criminal._id}`}
+                    src={getPhotoUrl(criminal._id)}
                     alt={criminal.name}
                     className="w-12 h-12 object-cover rounded-full ring-2 ring-gray-200"
                   />
