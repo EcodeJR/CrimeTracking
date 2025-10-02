@@ -21,15 +21,21 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const { body, files, user } = req;
+      const { body, files = {}, user } = req;
 
       const suspect = new Suspect({
         ...body,
-        photo: files.photo
-          ? { data: files.photo[0].buffer, contentType: files.photo[0].mimetype }
+        photo: files.photo?.[0] 
+          ? { 
+              data: files.photo[0].buffer, 
+              contentType: files.photo[0].mimetype 
+            }
           : undefined,
-        thumbprint: files.thumbprint
-          ? { data: files.thumbprint[0].buffer, contentType: files.thumbprint[0].mimetype }
+        thumbprint: files.thumbprint?.[0]
+          ? { 
+              data: files.thumbprint[0].buffer, 
+              contentType: files.thumbprint[0].mimetype 
+            }
           : undefined,
         createdBy: user.username,
         updatedBy: user.username,
@@ -43,17 +49,25 @@ router.post(
   }
 );
 
-// Serve photo
+// Update the photo serving route
 router.get("/photo/:id", protect, authorize("admin", "officer"), async (req, res) => {
   try {
     const suspect = await Suspect.findById(req.params.id);
-    if (suspect?.photo?.data) {
-      res.set("Content-Type", suspect.photo.contentType);
-      return res.send(suspect.photo.data);
+    
+    // Check if suspect exists and has photo data
+    if (!suspect?.photo?.data) {
+      return res.status(404).send("No photo found");
     }
-    res.status(404).send("No photo");
+
+    // Set correct content type and send photo data
+    res.set({
+      'Content-Type': suspect.photo.contentType || 'image/jpeg',
+      'Cache-Control': 'max-age=3600'
+    });
+    return res.send(suspect.photo.data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error serving photo:", err);
+    return res.status(500).json({ error: "Error serving photo" });
   }
 });
 
@@ -82,20 +96,49 @@ router.get("/", protect, authorize("admin", "officer"), async (req, res) => {
 });
 
 // UPDATE suspect
-router.put("/:id", protect, authorize("admin", "officer"), async (req, res) => {
-  try {
-    const suspect = await Suspect.findByIdAndUpdate(
-      req.params.id,
-      {
+router.put("/:id", protect, authorize("admin", "officer"), 
+  upload.fields([
+    { name: "photo", maxCount: 1 },
+    { name: "thumbprint", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const updateData = {
         ...req.body,
         updatedBy: req.user.username,
-      },
-      { new: true }
-    );
-    res.json(suspect);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+      };
+
+      // Handle photo update if new photo is uploaded
+      if (req.files?.photo?.[0]) {
+        updateData.photo = {
+          data: req.files.photo[0].buffer,
+          contentType: req.files.photo[0].mimetype
+        };
+      }
+
+      // Handle thumbprint update if new thumbprint is uploaded
+      if (req.files?.thumbprint?.[0]) {
+        updateData.thumbprint = {
+          data: req.files.thumbprint[0].buffer,
+          contentType: req.files.thumbprint[0].mimetype
+        };
+      }
+
+      const suspect = await Suspect.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true }
+      );
+
+      if (!suspect) {
+        return res.status(404).json({ error: "Suspect not found" });
+      }
+
+      res.json(suspect);
+    } catch (err) {
+      console.error("Update error:", err);
+      res.status(500).json({ error: err.message });
+    }
 });
 
 // DELETE suspect

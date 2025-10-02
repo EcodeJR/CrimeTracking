@@ -129,29 +129,31 @@ const CriminalEditModal = ({ open, onClose, record, onUpdate }) => {
 
     setLoading(true);
     try {
-      // If there's a new image, upload it first
+      const formData = new FormData();
+      
+      // Append all form data
+      Object.keys(form).forEach(key => {
+        if (form[key] !== undefined && form[key] !== null) {
+          formData.append(key, form[key]);
+        }
+      });
+
+      // Append image if selected
       if (imageFile) {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('type', 'criminal');
-        formData.append('id', record._id);
-        
-        const imageResponse = await API.post('/upload-image', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        
-        // Add the image path to the form data
-        form.imagePath = imageResponse.data.imagePath;
+        formData.append('photo', imageFile);
       }
 
-      await API.put(`/criminals/${record._id}`, form);
+      await API.put(`/criminals/${record._id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       onUpdate();
       onClose();
     } catch (error) {
       console.error("Error updating criminal record:", error);
-      // You might want to show an error message to the user here
+      setErrors({ submit: error.response?.data?.message || 'Failed to update record' });
     } finally {
       setLoading(false);
     }

@@ -56,7 +56,15 @@ const ComplainantTable = () => {
   );
 
   if (loading) {
-    return <div className="text-center py-4">Loading...</div>;
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Loading Complainant Records</h3>
+          <p className="text-sm text-gray-500">Please wait while we fetch the data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -114,8 +122,12 @@ const ComplainantTable = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">Loading Complainant Records</h3>
+            <p className="text-sm text-gray-500">Please wait while we fetch the data...</p>
+          </div>
         </div>
       )}
 

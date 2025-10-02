@@ -116,29 +116,32 @@ const SuspectEditModal = ({ open, onClose, record, onUpdate }) => {
 
     setLoading(true);
     try {
-      // If there's a new image, upload it first
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('type', 'suspect');
-        formData.append('id', record._id);
-        
-        const imageResponse = await API.post('/upload-image', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        
-        // Add the image path to the form data
-        form.imagePath = imageResponse.data.imagePath;
-      }
+      const formData = new FormData();
       
-      await API.put(`/suspects/${record._id}`, form);
+      // Append all form fields
+      Object.keys(form).forEach(key => {
+        if (form[key] !== undefined && form[key] !== null) {
+          formData.append(key, form[key]);
+        }
+      });
+      
+      // Append new image if selected
+      if (imageFile) {
+        formData.append('photo', imageFile);
+      }
+
+      // Make the update request
+      await API.put(`/suspects/${record._id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       onUpdate();
       onClose();
     } catch (error) {
       console.error("Error updating suspect:", error);
-      // You might want to show an error message to the user here
+      setErrors({ submit: error.response?.data?.message || 'Failed to update record' });
     } finally {
       setLoading(false);
     }
@@ -169,6 +172,13 @@ const SuspectEditModal = ({ open, onClose, record, onUpdate }) => {
                   src={`/suspects/photo/${record._id}`}
                   alt="Current photo"
                   className="w-full h-full object-cover"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  }
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">

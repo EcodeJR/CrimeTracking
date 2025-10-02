@@ -2,70 +2,45 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api';
 
-const ImageWithAuth = ({ src, alt, className, onError }) => {
-  const [imageSrc, setImageSrc] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+const ImageWithAuth = ({ src, alt, className, fallback, onError }) => {
+  const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        
-        const response = await API.get(src, {
-          responseType: 'blob'
-        });
-        
-        const imageUrl = URL.createObjectURL(response.data);
-        setImageSrc(imageUrl);
-      } catch (err) {
-        setError(true);
-        if (onError) {
-          onError(err);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (src) {
-      fetchImage();
-    }
-
-    // Cleanup
-    return () => {
-      if (imageSrc) {
-        URL.revokeObjectURL(imageSrc);
-      }
-    };
+    fetchImage();
   }, [src]);
 
-  if (loading) {
-    return (
-      <div className={`${className} bg-gray-200 flex items-center justify-center`}>
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-      </div>
-    );
+  const fetchImage = async () => {
+    try {
+      // Remove any leading 'api' from the URL path
+      const cleanPath = src.replace(/^\/api\//, '/');
+      
+      const response = await API.get(cleanPath, {
+        responseType: 'blob'
+      });
+      
+      setImageUrl(URL.createObjectURL(response.data));
+    } catch (error) {
+      console.error('Image load error:', error);
+      if (onError) onError(error);
+      setImageUrl(null);
+    }
+  };
+
+  if (!imageUrl && fallback) {
+    return fallback;
   }
 
-  if (error || !imageSrc) {
-    return (
-      <img
-        src="/placeholder-avatar.png"
-        alt={alt}
-        className={className}
-      />
-    );
-  }
-
-  return (
+  return imageUrl ? (
     <img
-      src={imageSrc}
+      src={imageUrl}
       alt={alt}
       className={className}
+      onError={(e) => {
+        if (onError) onError(e);
+        if (fallback) setImageUrl(null);
+      }}
     />
-  );
+  ) : fallback || null;
 };
 
 export default ImageWithAuth;

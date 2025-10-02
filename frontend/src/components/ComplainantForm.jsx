@@ -18,7 +18,7 @@ const ComplainantForm = ({ onClose }) => {
     remarks: "",
     officerInCharge: "",
   });
-  
+  // const [photo, setPhoto] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [loading, setLoading] = useState(false);

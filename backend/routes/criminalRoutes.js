@@ -44,21 +44,44 @@ router.post(
 );
 
 // Update
-router.put("/:id", protect,
-  authorize("admin", "officer"), async (req, res) => {
-  try {
-    const criminal = await Criminal.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        updatedBy: req.user.username,
-      },
-      { new: true }
-    );
-    res.json(criminal);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+router.put("/:id", 
+  protect,
+  authorize("admin", "officer"), 
+  upload.fields([{ name: "photo" }, { name: "thumbprint" }]),
+  async (req, res) => {
+    try {
+      const { body, files, user } = req;
+      
+      const updateData = {
+        ...body,
+        updatedBy: user.username,
+      };
+
+      // Add photo if uploaded
+      if (files && files.photo) {
+        updateData.photo = {
+          data: files.photo[0].buffer,
+          contentType: files.photo[0].mimetype
+        };
+      }
+
+      // Add thumbprint if uploaded
+      if (files && files.thumbprint) {
+        updateData.thumbprint = {
+          data: files.thumbprint[0].buffer,
+          contentType: files.thumbprint[0].mimetype
+        };
+      }
+
+      const criminal = await Criminal.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true }
+      );
+      res.json(criminal);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
 });
 
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import API from "../api";
 
-const SuspectForm = ({ onClose }) => {
+const SuspectForm = ({ onClose, onUpdate }) => {
   const [form, setForm] = useState({
     name: "",
     crimeCode: "",
@@ -24,6 +24,7 @@ const SuspectForm = ({ onClose }) => {
   const [thumbPreview, setThumbPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,18 +62,55 @@ const SuspectForm = ({ onClose }) => {
 
     try {
       const formData = new FormData();
-      Object.keys(form).forEach((key) => formData.append(key, form[key]));
-      if (photo) formData.append("photo", photo);
-      if (thumbprint) formData.append("thumbprint", thumbprint);
+      
+      // Append all form fields that have values
+      Object.keys(form).forEach((key) => {
+        if (form[key]) {
+          formData.append(key, form[key]);
+        }
+      });
 
-      await API.post("/suspects", formData);
-      onClose();
+      // Explicitly append files
+      if (photo) {
+        formData.append("photo", photo);
+      }
+      if (thumbprint) {
+        formData.append("thumbprint", thumbprint);
+      }
+
+      await API.post("/suspects", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setSuccess(true);
+      if (onUpdate) onUpdate();
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
+      console.error("Error submitting form:", err);
       setError(err.response?.data?.message || "Failed to add suspect");
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Success!</h3>
+          <p className="text-gray-600">Suspect has been registered successfully.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

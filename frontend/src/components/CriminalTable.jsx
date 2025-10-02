@@ -41,7 +41,8 @@ const handlePrint = useReactToPrint({
   documentTitle: "Criminal_Report",
 });
 
-const getPhotoUrl = (id) => `/api/criminals/photo/${id}`;
+// Change this function
+const getPhotoUrl = (id) => `/criminals/photo/${id}`;
 
 
 
@@ -62,7 +63,15 @@ const getPhotoUrl = (id) => `/api/criminals/photo/${id}`;
   }, [filteredData, page, pageSize]);
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading...</div>;
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Loading Criminal Records</h3>
+          <p className="text-sm text-gray-500">Please wait while we fetch the data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

@@ -10,15 +10,20 @@ const ComplainantForm = lazy(() => import('../components/ComplainantForm'));
 
 const Dashboard = () => {
   const [activeForm, setActiveForm] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const renderForm = () => {
     switch (activeForm) {
       case 'criminal':
-        return <CriminalForm onClose={() => setActiveForm(null)} />;
+        return <CriminalForm onClose={() => setActiveForm(null)} onUpdate={handleRefresh} />;
       case 'suspect':
-        return <SuspectForm onClose={() => setActiveForm(null)} />;
+        return <SuspectForm onClose={() => setActiveForm(null)} onUpdate={handleRefresh} />;
       case 'complainant':
-        return <ComplainantForm onClose={() => setActiveForm(null)} />;
+        return <ComplainantForm onClose={() => setActiveForm(null)} onUpdate={handleRefresh} />;
       default:
         return null;
     }
@@ -63,9 +68,9 @@ const Dashboard = () => {
       )}
 
       <hr className="my-8" />
-      <CriminalTable />
-      <SuspectTable />
-      <ComplainantTable />
+      <CriminalTable key={`criminal-${refreshTrigger}`} />
+      <SuspectTable key={`suspect-${refreshTrigger}`} />
+      <ComplainantTable key={`complainant-${refreshTrigger}`} />
     </div>
   );
 };

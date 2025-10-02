@@ -56,7 +56,15 @@ const SuspectTable = () => {
   );
 
   if (loading) {
-    return <div className="text-center py-4">Loading...</div>;
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-yellow-600 mb-4"></div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Loading Suspect Records</h3>
+          <p className="text-sm text-gray-500">Please wait while we fetch the data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -146,11 +154,23 @@ const SuspectTable = () => {
               {filtered.map((suspect) => (
                 <tr key={suspect._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <ImageWithAuth
-                      src={`/suspects/photo/${suspect._id}`}
-                      alt={suspect.name}
-                      className="w-12 h-12 object-cover rounded-full ring-2 ring-gray-200"
-                    />
+                    <div className="relative w-12 h-12">
+                      <ImageWithAuth
+                        src={`/suspects/photo/${suspect._id}`}
+                        alt={suspect.name}
+                        className="w-12 h-12 object-cover rounded-full ring-2 ring-gray-200"
+                        onError={(e) => {
+                          console.error("Image load error:", e);
+                        }}
+                        fallback={
+                          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                        }
+                      />
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{suspect.name}</div>
@@ -204,7 +224,7 @@ const SuspectTable = () => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth="2"
               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>

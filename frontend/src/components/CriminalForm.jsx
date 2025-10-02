@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import API from "../api";
 
-const CriminalForm = ({ onClose }) => {
+const CriminalForm = ({ onClose, onUpdate }) => {
+  // Add success state
+  const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
     name: "",
     crimeCode: "",
@@ -22,6 +24,8 @@ const CriminalForm = ({ onClose }) => {
   const [thumbPreview, setThumbPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  const [thumbprint, setThumbprint] = useState(null);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,50 +34,63 @@ const CriminalForm = ({ onClose }) => {
     const file = e.target.files[0];
     const url = URL.createObjectURL(file);
     if (type === "photo") {
+      setPhoto(file);
       setPhotoPreview(url);
     } else {
+      setThumbprint(file);
       setThumbPreview(url);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData();
+    Object.keys(form).forEach((key) => {
+      if (form[key]) {
+        formData.append(key, form[key]);
+      }
+    });
+    if (photo) {
+      formData.append("photo", photo);
+    }
+    if (thumbprint) {
+      formData.append("thumbprint", thumbprint);
+    }
     setLoading(true);
     setError(null);
     try {
-      await fetch('/api/criminals', {
-        method: 'POST',
-        body: formData,
-        // No need for Content-Type header; browser sets it automatically for FormData
+      await API.post("/criminals", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      alert("Criminal added successfully");
-      onClose();
-      // Reset form
-      setForm({
-        name: "",
-        crimeCode: "",
-        arrestDate: "",
-        convictDate: "",
-        address: "",
-        state: "",
-        lga: "",
-        gender: "",
-        age: "",
-        complexion: "",
-        height: "",
-        weight: "",
-        remarks: "",
-        officerInCharge: "",
-      });
-      setPhotoPreview("");
-      setThumbPreview("");
+      setSuccess(true);
+      if (onUpdate) onUpdate();
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to add criminal");
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Success!</h3>
+          <p className="text-gray-600">Criminal has been registered successfully.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Form field configurations for better organization
   const formSections = [
